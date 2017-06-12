@@ -1,0 +1,51 @@
+--
+-- Initialize news DATABASE
+--
+
+DROP DATABASE IF EXISTS news;
+--
+-- Name: news; Type: DATABASE; Schema: public; Owner: vagrant; Tablespace
+--
+CREATE DATABASE news;
+\c news;
+\i newsdata.sql;
+
+
+--
+-- Name: log_view; Type: VIEW; Schema: public; Owner: vagrant; Tablespace
+--
+
+ CREATE VIEW LOG_VIEW AS 
+	SELECT PATH, COUNT(PATH) AS VIEW_COUNTS 
+	FROM LOG 
+	GROUP BY PATH 
+	ORDER BY VIEW_COUNTS DESC;
+	
+--
+-- Name: author_view; Type: VIEW; Schema: public; Owner: vagrant; Tablespace
+--
+
+ CREATE VIEW AUTHOR_VIEW AS 
+	SELECT ARTICLES.AUTHOR AS ARTICLE_AUTHOR, LOG_VIEW.VIEW_COUNTS AS ARTICLE_COUNTS
+	FROM ARTICLES, LOG_VIEW 
+	WHERE LOG_VIEW.PATH LIKE '%'||ARTICLES.SLUG;
+
+--
+-- Name: ERRORS_PER_DAY; Type: VIEW; Schema: public; Owner: vagrant; Tablespace
+--
+
+ CREATE VIEW ERRORS_PER_DAY AS
+	SELECT DATE(TIME) AS ERROR_DAY, COUNT(*) AS ERROR_COUNTS 
+	FROM LOG WHERE STATUS LIKE '4%' OR STATUS LIKE '5%' 
+	GROUP BY ERROR_DAY 
+	ORDER BY ERROR_COUNTS DESC;
+
+--
+-- Name: REQUESTS_PER_DAY; Type: VIEW; Schema: public; Owner: vagrant; Tablespace
+--
+
+ CREATE VIEW REQUESTS_PER_DAY AS 
+	SELECT DATE(TIME) AS REQUEST_DAY, COUNT(*) AS REQUEST_COUNTS 
+	FROM LOG
+	GROUP BY REQUEST_DAY 
+	ORDER BY REQUEST_COUNTS DESC;
